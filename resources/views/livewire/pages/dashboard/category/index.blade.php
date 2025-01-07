@@ -2,6 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use App\Models\Category;
 
@@ -9,6 +10,7 @@ new #[Layout('layouts.dashboard')] class extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search;
 
     public function with()
