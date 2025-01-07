@@ -101,7 +101,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                             </div>
                         </td>
                         <td class="p-4">
-                            <button type="button" class="cursor-pointer whitespace-nowrap rounded-lg bg-transparent p-0.5 font-semibold text-sky-900 outline-sky-900 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-sky-400 dark:outline-sky-400">
+                            <button x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')" type="button" class="cursor-pointer whitespace-nowrap rounded-lg bg-transparent p-0.5 font-semibold text-sky-900 outline-sky-900 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-sky-400 dark:outline-sky-400">
                                 Edit
                             </button>
                         </td>
