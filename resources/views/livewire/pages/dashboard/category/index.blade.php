@@ -13,6 +13,11 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $search;
 
+    public function delete(Category $category)
+    {
+        $category->delete();
+    }
+
     public function updating()
     {
         $this->resetPage();
@@ -50,7 +55,7 @@ new #[Layout('layouts.dashboard')] class extends Component
         </div>
     </div>
 
-    @session('success')
+    @if(session('success'))
         <!-- success Alert -->
         <div x-data="{showAlert: true}" x-show="showAlert" class="relative w-full overflow-hidden rounded-lg border border-green-500 bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-300 mb-4" role="alert">
             <div class="flex w-full items-center gap-2 bg-green-500/10 p-4">
@@ -61,7 +66,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                 </div>
                 <div class="ml-2">
                     <h3 class="text-sm font-semibold text-green-500">Successfully Created</h3>
-                    <p class="text-xs font-medium sm:text-sm">Success! {{ $value }}</p>
+                    <p class="text-xs font-medium sm:text-sm">Success! {{ session('success') }}</p>
                 </div>
                 <button class="ml-auto" aria-label="dismiss alert" x-on:click="showAlert = false">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2.5" class="w-4 h-4 shrink-0">
@@ -120,13 +125,16 @@ new #[Layout('layouts.dashboard')] class extends Component
                             </div>
                         </td>
                         <td class="p-4">
-                            <div class="max-w-[500px] truncate">
+                            <div class="max-w-[300px] truncate">
                                 {{ $category->description }}
                             </div>
                         </td>
                         <td class="p-4">
                             <button x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')" type="button" class="cursor-pointer whitespace-nowrap rounded-lg bg-transparent p-0.5 font-semibold text-sky-900 outline-sky-900 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-sky-400 dark:outline-sky-400">
                                 Edit
+                            </button>
+                            <button wire:click="delete({{ $category->id }})" wire:confirm="Are you sure you want to delete {{ $category->name }}?" type="button" class="cursor-pointer whitespace-nowrap bg-transparent rounded-lg p-0.5 font-semibold text-red-500 transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:text-red-500 dark:focus-visible:outline-red-500">
+                                Delete
                             </button>
                         </td>
                     </tr>
