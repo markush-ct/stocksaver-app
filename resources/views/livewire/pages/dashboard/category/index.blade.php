@@ -13,6 +13,11 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $search;
 
+    public function updating()
+    {
+        $this->resetPage();
+    }
+
     public function with()
     {
         return [
