@@ -231,7 +231,8 @@ new #[Layout('layouts.dashboard')] class extends Component
             <x-app.button x-on:click="modalIsOpen = false" class="w-full" variant="alternate">
                 Cancel
             </x-app.button>
-            <x-app.button wire:click="confirmDeletion()" class="w-full" variant="danger">
+            <x-app.button wire:loading.attr="disabled" wire:click="confirmDeletion()" class="w-full" variant="danger">
+                <x-app.icon-loader wire:target="confirmDeletion()" wire:loading.delay.default />
                 Confirm
             </x-app.button>
         </x-slot:modal-footer>
