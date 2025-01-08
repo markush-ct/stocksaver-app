@@ -36,7 +36,10 @@ new #[Layout('layouts.dashboard')] class extends Component {
 
         session()->flash('success', 'You have successfully updated a category.');
 
-        return $this->redirectRoute('category.index');
+        return $this->redirectRoute('category.index', [
+            'selectedRow' => $this->category->id,
+            'alertType' => 'updated',
+        ]);
     }
 }; ?>
 

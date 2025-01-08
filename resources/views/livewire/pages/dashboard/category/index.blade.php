@@ -13,6 +13,12 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $search;
 
+    #[Url]
+    public $selectedRow;
+
+    #[Url]
+    public $alertType;
+
     public Category $selectedCategory;
 
     public function view(Category $category)
@@ -92,7 +98,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                     </svg>
                 </div>
                 <div class="ml-2">
-                    <h3 class="text-sm font-semibold text-green-500">Successfully Created</h3>
+                    <h3 class="text-sm font-semibold text-green-500">Successfully {{ $alertType }}</h3>
                     <p class="text-xs font-medium sm:text-sm">Success! {{ session('success') }}</p>
                 </div>
                 <button class="ml-auto" aria-label="dismiss alert" x-on:click="showAlert = false">
@@ -135,7 +141,7 @@ new #[Layout('layouts.dashboard')] class extends Component
             </thead>
             <tbody class="divide-y divide-gray-500 dark:divide-gray-500">
                 @forelse ($categories as $category)
-                    <tr wire:key="{{ $category->id }}">
+                    <tr wire:key="{{ $category->id }}" class='{{ $selectedRow === $category->id ? 'bg-sky-900/10 dark:bg-sky-400/10' : '' }}' wire:target="delete({{ $category->id }})">
                         <td class="p-4">
                             <label for="{{ $category->id }}" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
                                 <div class="relative flex items-center">

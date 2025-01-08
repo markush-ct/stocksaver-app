@@ -15,11 +15,14 @@ new #[Layout('layouts.dashboard')] class extends Component {
     {
         $validated = $this->validate();
 
-        auth()->user()->categories()->create($validated);
+        $category = auth()->user()->categories()->create($validated);
 
         session()->flash('success', 'You have successfully created a category.');
 
-        return $this->redirectRoute('category.index');
+        return $this->redirectRoute('category.index', [
+            'selectedRow' => $category->id,
+            'alertType' => 'created',
+        ]);
     }
 }; ?>
 
