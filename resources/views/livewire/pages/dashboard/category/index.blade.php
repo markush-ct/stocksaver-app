@@ -110,7 +110,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                     </th>
                     <th scope="col" class="p-4">Name</th>
                     <th scope="col" class="p-4">Description</th>
-                    <th scope="col" class="p-4">Actions</th>
+                    <th scope="col" class="p-4"></th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-500 dark:divide-gray-500">
@@ -136,13 +136,19 @@ new #[Layout('layouts.dashboard')] class extends Component
                                 {{ $category->description }}
                             </div>
                         </td>
-                        <td class="p-4">
-                            <button x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')" type="button" class="cursor-pointer whitespace-nowrap rounded-lg bg-transparent p-0.5 font-semibold text-sky-900 outline-sky-900 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-sky-400 dark:outline-sky-400">
+                        <td class="p-4 flex flex-row gap-1">
+                            <x-app.action-button variant="inverse">
+                                <i class="ph-fill ph-eye text-md"></i>
+                                View
+                            </x-app.action-button>
+                            <x-app.action-button variant="primary" x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')">
+                                <i class="ph-fill ph-pencil-simple text-md"></i>
                                 Edit
-                            </button>
-                            <button wire:click="delete({{ $category->id }})" wire:confirm="Are you sure you want to delete {{ $category->name }}?" type="button" class="cursor-pointer whitespace-nowrap bg-transparent rounded-lg p-0.5 font-semibold text-red-500 transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500 active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:text-red-500 dark:focus-visible:outline-red-500">
+                            </x-app.action-button>
+                            <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})" wire:confirm="Are you sure you want to delete {{ $category->name }}?">
+                                <i class="ph-fill ph-trash-simple text-md"></i>
                                 Delete
-                            </button>
+                            </x-app.action-button>
                         </td>
                     </tr>
                 @empty
