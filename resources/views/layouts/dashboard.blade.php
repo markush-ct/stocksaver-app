@@ -16,6 +16,7 @@
 </head>
 
 <body class="font-poppins antialiased">
+    <!-- app sidebar -->
     <x-app.sidebar>
         <!-- top navbar & main content  -->
         <div class="h-svh w-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
@@ -30,6 +31,9 @@
             </div>
         </div>
     </x-app.sidebar>
+
+    <!-- Notifications -->
+    <x-app.notifications />
 </body>
 
 </html>

@@ -16,6 +16,13 @@ new #[Layout('layouts.dashboard')] class extends Component
     public function delete(Category $category)
     {
         $category->delete();
+
+        $this->dispatch(
+            'notify',
+            variant: 'success',
+            title: 'Success!',
+            message: "{$category->name} have been deleted successfully!",
+        );
     }
 
     public function updating()
