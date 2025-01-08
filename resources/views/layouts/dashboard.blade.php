@@ -21,7 +21,7 @@
         <!-- top navbar & main content  -->
         <div class="h-svh w-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
             <!-- top navbar  -->
-            <x-app.navbar />
+            <livewire:layout.navbar />
 
             <!-- main content  -->
             <div id="main-content" class="p-4">
