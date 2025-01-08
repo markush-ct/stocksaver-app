@@ -13,6 +13,15 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $search;
 
+    public Category $categoryItem;
+
+    public function view(Category $category)
+    {
+        $this->categoryItem = $category;
+
+        $this->dispatch('category-viewed');
+    }
+
     public function delete(Category $category)
     {
         $category->delete();
@@ -62,7 +71,7 @@ new #[Layout('layouts.dashboard')] class extends Component
         </div>
     </div>
 
-    @if(session('success'))
+    @if (session('success'))
         <!-- success Alert -->
         <div x-data="{showAlert: true}" x-show="showAlert" class="relative w-full overflow-hidden rounded-lg border border-green-500 bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-300 mb-4" role="alert">
             <div class="flex w-full items-center gap-2 bg-green-500/10 p-4">
@@ -82,7 +91,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                 </button>
             </div>
         </div>
-    @endsession
+    @endif
 
     <!-- Search input -->
     <div class="mb-4">
@@ -137,8 +146,12 @@ new #[Layout('layouts.dashboard')] class extends Component
                             </div>
                         </td>
                         <td class="p-4 flex flex-row gap-1">
-                            <x-app.action-button variant="inverse">
-                                <i class="ph-fill ph-eye text-md"></i>
+                            <x-app.action-button wire:click="view({{ $category->id }})" wire:loading.attr="disabled" variant="inverse">
+                                <svg wire:target="view({{ $category->id }})" wire:loading.delay aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-4 animate-spin motion-reduce:animate-none fill-white" >
+                                    <path opacity="0.25" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" />
+                                    <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" />
+                                </svg>
+                                <i wire:target="view({{ $category->id }})" wire:loading.delay.remove class="ph-fill ph-eye text-md"></i>
                                 View
                             </x-app.action-button>
                             <x-app.action-button variant="primary" x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')">
@@ -165,4 +178,35 @@ new #[Layout('layouts.dashboard')] class extends Component
     <div class="mt-4">
         {{ $categories->links() }}
     </div>
+
+    <!-- Modal -->
+    <x-app.modal x-on:category-viewed.window="modalIsOpen = true">
+        <x-slot:modal-header>{{ str($categoryItem->name ?? '')->words(8) }}</x-slot:modal-header>
+        <x-slot:modal-body>
+            <div class="space-y-4">
+                <div class="grid grid-cols-12">
+                    <div class="col-span-4 font-semibold">
+                        Name
+                    </div>
+                    <div class="col-span-8">
+                        {{ $categoryItem->name ?? '' }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-12">
+                    <div class="col-span-4 font-semibold">
+                        Description
+                    </div>
+                    <div class="col-span-8">
+                        {{ $categoryItem->description ?? '' }}
+                    </div>
+                </div>
+            </div>
+        </x-slot:modal-body>
+        <x-slot:modal-footer>
+            <x-app.button x-on:click="Livewire.navigate('{{ route('category.edit', $categoryItem->id ?? '') }}')">
+                <i class="ph-fill ph-pencil-simple text-lg"></i>
+                Edit
+            </x-app.button>
+        </x-slot:modal-footer>
+    </x-app.modal>
 </div>
