@@ -5,6 +5,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 use App\Models\Category;
+use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.dashboard')] class extends Component
 {
@@ -23,6 +24,8 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     public function view(Category $category)
     {
+        Gate::authorize('view', $category);
+
         $this->selectedCategory = $category;
 
         $this->dispatch('category-viewed');
@@ -30,6 +33,8 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     public function delete(Category $category)
     {
+        Gate::authorize('delete', $category);
+
         $this->dispatch('open-alert');
 
         $this->selectedCategory = $category;
@@ -37,6 +42,8 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     public function confirmDeletion()
     {
+        Gate::authorize('delete', $this->selectedCategory);
+
         $categoryName = $this->selectedCategory->name;
 
         $this->selectedCategory->delete();
