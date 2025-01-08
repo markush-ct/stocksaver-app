@@ -13,24 +13,35 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $search;
 
-    public Category $categoryItem;
+    public Category $selectedCategory;
 
     public function view(Category $category)
     {
-        $this->categoryItem = $category;
+        $this->selectedCategory = $category;
 
         $this->dispatch('category-viewed');
     }
 
     public function delete(Category $category)
     {
-        $category->delete();
+        $this->dispatch('open-alert');
+
+        $this->selectedCategory = $category;
+    }
+
+    public function confirmDeletion()
+    {
+        $categoryName = $this->selectedCategory->name;
+
+        $this->selectedCategory->delete();
+
+        $this->dispatch('close-alert');
 
         $this->dispatch(
             'notify',
             variant: 'success',
             title: 'Success!',
-            message: "{$category->name} have been deleted successfully!",
+            message: "{$categoryName} have been deleted successfully!",
         );
     }
 
@@ -158,7 +169,7 @@ new #[Layout('layouts.dashboard')] class extends Component
                                 <i class="ph-fill ph-pencil-simple text-md"></i>
                                 Edit
                             </x-app.action-button>
-                            <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})" wire:confirm="Are you sure you want to delete {{ $category->name }}?">
+                            <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})">
                                 <i class="ph-fill ph-trash-simple text-md"></i>
                                 Delete
                             </x-app.action-button>
@@ -181,32 +192,50 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     <!-- Modal -->
     <x-app.modal x-on:category-viewed.window="modalIsOpen = true">
-        <x-slot:modal-header>{{ str($categoryItem->name ?? '')->words(8) }}</x-slot:modal-header>
+        <x-slot:modal-header>{{ str($selectedCategory->name ?? '')->words(8) }}</x-slot:modal-header>
         <x-slot:modal-body>
             <div class="space-y-4">
-                <div class="grid grid-cols-12">
+                <div class="grid max-sm:grid-cols-1 grid-cols-12 gap-1">
                     <div class="col-span-4 font-semibold">
                         Name
                     </div>
                     <div class="col-span-8">
-                        {{ $categoryItem->name ?? '' }}
+                        {{ $selectedCategory->name ?? '' }}
                     </div>
                 </div>
-                <div class="grid grid-cols-12">
+                <div class="grid max-sm:grid-cols-1 grid-cols-12 gap-1">
                     <div class="col-span-4 font-semibold">
                         Description
                     </div>
                     <div class="col-span-8">
-                        {{ $categoryItem->description ?? '' }}
+                        {{ $selectedCategory->description ?? '' }}
                     </div>
                 </div>
             </div>
         </x-slot:modal-body>
         <x-slot:modal-footer>
-            <x-app.button x-on:click="Livewire.navigate('{{ route('category.edit', $categoryItem->id ?? '') }}')">
+            <x-app.button x-on:click="Livewire.navigate('{{ route('category.edit', $selectedCategory->id ?? '') }}')">
                 <i class="ph-fill ph-pencil-simple text-lg"></i>
                 Edit
             </x-app.button>
         </x-slot:modal-footer>
     </x-app.modal>
+
+    <x-app.modal-alert
+        x-on:open-alert.window="modalIsOpen = true"
+        x-on:close-alert.window="modalIsOpen = false"
+        variant="danger"
+        title="Delete {{ str($selectedCategory->name ?? '')->words(4) }}"
+        message="Are you sure you would like to do this?"
+        isForDeletion=true
+    >
+        <x-slot:modal-footer>
+            <x-app.button x-on:click="modalIsOpen = false" class="w-full" variant="alternate">
+                Cancel
+            </x-app.button>
+            <x-app.button wire:click="confirmDeletion()" class="w-full" variant="danger">
+                Confirm
+            </x-app.button>
+        </x-slot:modal-footer>
+    </x-app.modal-alert>
 </div>
