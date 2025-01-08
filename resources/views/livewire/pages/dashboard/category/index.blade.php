@@ -158,11 +158,8 @@ new #[Layout('layouts.dashboard')] class extends Component
                         </td>
                         <td class="p-4 flex flex-row gap-1">
                             <x-app.action-button wire:click="view({{ $category->id }})" wire:loading.attr="disabled" variant="inverse">
-                                <svg wire:target="view({{ $category->id }})" wire:loading.delay aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-4 animate-spin motion-reduce:animate-none fill-white" >
-                                    <path opacity="0.25" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z" />
-                                    <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z" />
-                                </svg>
-                                <i wire:target="view({{ $category->id }})" wire:loading.delay.remove class="ph-fill ph-eye text-md"></i>
+                                <x-app.icon-loader wire:target="view({{ $category->id }})" wire:loading.delay.default class="fill-black dark:fill-white" />
+                                <i wire:target="view({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-eye text-base"></i>
                                 View
                             </x-app.action-button>
                             <x-app.action-button variant="primary" x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')">
@@ -170,7 +167,8 @@ new #[Layout('layouts.dashboard')] class extends Component
                                 Edit
                             </x-app.action-button>
                             <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})">
-                                <i class="ph-fill ph-trash-simple text-md"></i>
+                                <x-app.icon-loader wire:target="delete({{ $category->id }})" wire:loading.delay.default class="fill-red-500 dark:fill-red-500" />
+                                <i wire:target="delete({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-trash-simple text-md"></i>
                                 Delete
                             </x-app.action-button>
                         </td>
