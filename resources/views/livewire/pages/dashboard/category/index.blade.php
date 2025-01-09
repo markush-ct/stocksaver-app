@@ -22,11 +22,19 @@ new #[Layout('layouts.dashboard')] class extends Component
     public $alertType;
 
     #[Url]
-    public $page;
+    public $perPage;
 
     public Category $selectedCategory;
 
     public $selCategoryIds = [];
+
+    public function boot()
+    {
+        if (! is_int($this->perPage))
+        {
+            $this->perPage = 10;
+        }
+    }
 
     #[Computed]
     public function categories()
@@ -38,7 +46,7 @@ new #[Layout('layouts.dashboard')] class extends Component
             ->categories()
             ->name($this->search)
             ->latest()
-            ->paginate(10);
+            ->paginate($this->perPage ?? 10);
     }
 
     public function view(Category $category)
@@ -89,6 +97,15 @@ new #[Layout('layouts.dashboard')] class extends Component
             title: 'Success!',
             message: "You have been deleted the selected records successfully!",
         );
+    }
+
+    public function updatedPerPage($perPage)
+    {
+        $validPerPageValues = [10, 20, 30, 40, 50];
+
+        if (in_array($perPage, $validPerPageValues)) {
+            $this->perPage = $perPage;
+        }
     }
 
     public function updatedSearch()
@@ -267,12 +284,21 @@ new #[Layout('layouts.dashboard')] class extends Component
         </table>
     </div>
 
-    <div class="mt-4">
-        {{ $this->categories->links() }}
+    <!-- per page -->
+    <div class="relative flex w-full items-center flex-row gap-2 text-gray-800 dark:text-gray-300 mt-4">
+        <label for="per-page" class="text-sm">Per Page</label>
+        <select wire:model.live.debounce.300ms="perPage" id="per-page" defaultValue="10" name="per-page" class="w-full max-w-20 appearance-none rounded-lg border border-gray-500 bg-gray-200 px-4 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-900 disabled:cursor-not-allowed disabled:opacity-75 dark:border-gray-500 dark:bg-gray-800/50 dark:focus-visible:outline-sky-400">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+        </select>
     </div>
 
-    <div>
-        @dump($selCategoryIds, $this->categories)
+
+    <div class="mt-4">
+        {{ $this->categories->links() }}
     </div>
 
     <!-- Modal -->
