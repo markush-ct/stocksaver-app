@@ -16,6 +16,10 @@ new class extends Component
     }
 }; ?>
 
+{{-- value comes from the dashboard layout when the livewire pages is extending to
+and passing in a breadcrumb blade file through <x-slot:breadcrumbs> --}}
+@aware(['breadcrumbs'])
+
 <div>
     <nav class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-500 bg-gray-200 px-4 py-2 dark:border-gray-500 dark:bg-gray-800"
         aria-label="top navibation bar">
@@ -32,23 +36,7 @@ new class extends Component
         </button>
 
         <!-- breadcrumbs  -->
-        <nav class="hidden md:inline-block text-sm font-medium text-gray-800 dark:text-gray-300"
-            aria-label="breadcrumb">
-            <ol class="flex flex-wrap items-center gap-1">
-                <li class="flex items-center gap-1">
-                    <a href="#" class="hover:text-gray-950 dark:hover:text-gray-100">Dashboard</a>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none"
-                        stroke-width="2" class="size-4" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                    </svg>
-                </li>
-
-                <li class="flex items-center gap-1 font-bold text-gray-950 dark:text-gray-100" aria-current="page">
-                    Marketing
-                </li>
-            </ol>
-        </nav>
-
+        {{ $breadcrumbs }}
 
         <!-- Profile Menu  -->
         <div x-data="{ userDropdownIsOpen: false }" class="relative" x-on:keydown.esc.window="userDropdownIsOpen = false">

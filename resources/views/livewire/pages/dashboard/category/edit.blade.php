@@ -43,7 +43,23 @@ new #[Layout('layouts.dashboard')] class extends Component {
     }
 }; ?>
 
+@php
+    $breadcrumbsLinks = [
+        [
+            'label' => 'Categories',
+            'routeName' => 'category.index',
+        ],
+        [
+            'label' => 'Edit',
+        ],
+    ]
+@endphp
+
 <div>
+    <x-slot:breadcrumbs>
+        <x-app.breadcrumbs :links="$breadcrumbsLinks" />
+    </x-slot:breadcrumbs>
+
     <div class="flex justify-between items-end text-gray-800 dark:text-gray-300 mb-4">
         <div class="flex flex-col gap-2">
             <h3 class="text-balance text-xl lg:text-2xl font-bold text-gray-950 dark:text-gray-100" aria-describedby="featureDescription">
