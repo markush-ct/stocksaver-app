@@ -1,4 +1,4 @@
-@props(['variant' => 'primary', 'size' => 'md'])
+@props(['variant' => 'primary', 'size' => 'md', 'class' => ''])
 
 @php
     $classes = [
@@ -22,7 +22,7 @@
 
 <!-- primary Button -->
 <button
-    {{ $attributes->merge(['type' => 'button', 'class' => "{$classes} {$sizes} inline-flex justify-center items-center gap-2"]) }}
+    {{ $attributes->merge(['type' => 'button', 'class' => "{$classes} {$sizes} {$class} inline-flex justify-center items-center gap-2"]) }}
 >
     {{ $slot }}
 </button>

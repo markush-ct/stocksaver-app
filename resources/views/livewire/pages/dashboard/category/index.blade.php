@@ -127,8 +127,8 @@ new #[Layout('layouts.dashboard')] class extends Component
         <x-app.breadcrumbs :links="$breadcrumbsLinks" />
     </x-slot:breadcrumbs>
 
-    <div class="flex justify-between items-end text-gray-800 dark:text-gray-300 mb-4">
-        <div class="flex flex-col gap-2">
+    <div class="flex max-sm:flex-col gap-4 items-end text-gray-800 dark:text-gray-300 mb-4">
+        <div class="flex flex-col gap-2 w-full">
             <h3 class="text-balance text-xl lg:text-2xl font-bold text-gray-950 dark:text-gray-100" aria-describedby="featureDescription">
                 Categories List
             </h3>
@@ -137,8 +137,8 @@ new #[Layout('layouts.dashboard')] class extends Component
             </p>
         </div>
 
-        <div>
-            <x-app.button x-on:click="Livewire.navigate('{{ route('category.create') }}')">
+        <div class="w-full flex justify-end">
+            <x-app.button class="max-sm:w-full self-end" x-on:click="Livewire.navigate('{{ route('category.create') }}')">
                 <i class="ph-fill ph-plus-circle text-[20px]"></i>
                 Create new
             </x-app.button>
@@ -168,7 +168,7 @@ new #[Layout('layouts.dashboard')] class extends Component
     @endif
 
     <!-- Search input -->
-    <div class="mb-4 flex justify-between">
+    <div class="mb-4 flex justify-between gap-2">
         <!-- bulk delete button -->
         <x-app.button
             x-show="$wire.selCategoryIds.length > 0"
@@ -179,7 +179,7 @@ new #[Layout('layouts.dashboard')] class extends Component
             Bulk Delete
         </x-app.button>
 
-        <div class="relative flex w-full max-w-xs flex-col gap-1 text-gray-800 dark:text-gray-300 ml-auto">
+        <div class="relative flex w-full sm:max-w-xs flex-col gap-1 text-gray-800 dark:text-gray-300 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2 text-gray-800/50 dark:text-gray-300/50">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
