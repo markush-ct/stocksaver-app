@@ -65,6 +65,8 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     public function with()
     {
+        Gate::authorize('viewAny', Category::class);
+
         return [
             'categories' => auth()
                 ->user()
