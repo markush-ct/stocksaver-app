@@ -3,6 +3,7 @@
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Computed;
 use Livewire\WithPagination;
 use App\Models\Category;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +21,25 @@ new #[Layout('layouts.dashboard')] class extends Component
     #[Url]
     public $alertType;
 
+    #[Url]
+    public $page;
+
     public Category $selectedCategory;
+
+    public $selCategoryIds = [];
+
+    #[Computed]
+    public function categories()
+    {
+        Gate::authorize('viewAny', Category::class);
+
+        return auth()
+            ->user()
+            ->categories()
+            ->name($this->search)
+            ->latest()
+            ->paginate(10);
+    }
 
     public function view(Category $category)
     {
@@ -58,23 +77,23 @@ new #[Layout('layouts.dashboard')] class extends Component
         );
     }
 
-    public function updating()
+    public function bulkDelete()
     {
-        $this->resetPage();
+        auth()->user()->categories()->whereIn('id', $this->selCategoryIds)->delete();
+
+        $this->selCategoryIds = [];
+
+        $this->dispatch(
+            'notify',
+            variant: 'success',
+            title: 'Success!',
+            message: "You have been deleted the selected records successfully!",
+        );
     }
 
-    public function with()
+    public function updatedSearch()
     {
-        Gate::authorize('viewAny', Category::class);
-
-        return [
-            'categories' => auth()
-                ->user()
-                ->categories()
-                ->name($this->search)
-                ->latest()
-                ->paginate(10),
-        ];
+        $this->resetPage();
     }
 }; ?>
 
@@ -132,8 +151,18 @@ new #[Layout('layouts.dashboard')] class extends Component
     @endif
 
     <!-- Search input -->
-    <div class="mb-4">
-        <div class="relative flex w-full max-w-xs flex-col gap-1 text-gray-800 dark:text-gray-300">
+    <div class="mb-4 flex justify-between">
+        <!-- bulk delete button -->
+        <x-app.button
+            x-show="$wire.selCategoryIds.length > 0"
+            wire:click.prevent="bulkDelete"
+            variant="danger"
+            x-bind:disabled="$wire.selCategoryIds.length < 1"
+        >
+            Bulk Delete
+        </x-app.button>
+
+        <div class="relative flex w-full max-w-xs flex-col gap-1 text-gray-800 dark:text-gray-300 ml-auto">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true" class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2 text-gray-800/50 dark:text-gray-300/50">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
@@ -141,22 +170,32 @@ new #[Layout('layouts.dashboard')] class extends Component
         </div>
     </div>
 
-    <div x-data="{ selectedRowsCount : 0, show : false }" x-show="show" x-on:rows-deselected-all="show = false" x-on:rows-selected.window="selectedRowsCount = $event.detail.selectedRowsCount; show = selectedRowsCount > 0" class="flex justify-between mb-4">
-        <p class="text-gray-800 dark:text-gray-300"><span x-text="selectedRowsCount"></span> records selected</p>
-        <button x-on:click="$dispatch('rows-deselected-all')" class="hover:underline text-red-500">
+    <div
+        x-show="$wire.selCategoryIds.length > 0"
+        class="flex justify-between mb-4"
+    >
+        <p class="text-gray-800 dark:text-gray-300">
+            <span x-text="$wire.selCategoryIds.length"></span>
+            records selected
+        </p>
+        <button class="hover:underline text-red-500">
             Deselect all
         </button>
     </div>
 
-    <div x-data="{ checkAll : false, selectedRowsCount : 0 }" x-on:rows-deselected-all.window="checkAll = false; selectedRowsCount = 0;" class="overflow-hidden w-full overflow-x-auto rounded-lg border border-gray-500 dark:border-gray-500">
+    <div class="overflow-hidden w-full overflow-x-auto rounded-lg border border-gray-500 dark:border-gray-500">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-300">
             <thead class="border-b border-gray-500 bg-gray-200 text-sm text-gray-950 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-100">
                 <tr>
                     <th scope="col" class="p-4">
                         <label for="checkAll" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
                             <div class="relative flex items-center">
-                                <!-- selecting table rows -->
-                                <input x-on:click="$event.target.checked ? selectedRowsCount = {{ $categories->count() }} : selectedRowsCount = 0; $dispatch('rows-selected', { selectedRowsCount : selectedRowsCount })" type="checkbox" x-model="checkAll" id="checkAll" class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400" />
+                                <!-- selecting all table rows -->
+                                <input
+                                    type="checkbox"
+                                    id="checkAll"
+                                    class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
+                                />
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                                 </svg>
@@ -169,13 +208,21 @@ new #[Layout('layouts.dashboard')] class extends Component
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-500 dark:divide-gray-500">
-                @forelse ($categories as $category)
+                @forelse ($this->categories as $category)
                     <tr wire:key="{{ $category->id }}" class='{{ $selectedRow === $category->id ? 'bg-sky-900/10 dark:bg-sky-400/10' : '' }}' wire:target="delete({{ $category->id }})">
                         <td class="p-4">
                             <label for="{{ $category->id }}" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
                                 <div class="relative flex items-center">
                                     <!-- selecting individual row -->
-                                    <input x-on:click="$event.target.checked ? selectedRowsCount++ : selectedRowsCount--; $dispatch('rows-selected', {selectedRowsCount : selectedRowsCount})" type="checkbox" id="{{ $category->id }}" class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400" :checked="checkAll" />
+                                    <input
+                                        wire:model="selCategoryIds"
+                                        type="checkbox"
+                                        name="selCategoryIds"
+                                        id="{{ $category->id }}"
+                                        value="{{ $category->id }}"
+                                        class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
+                                        checked="{{ in_array($category->id, $selCategoryIds) }}"
+                                    />
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                                     </svg>
@@ -221,7 +268,11 @@ new #[Layout('layouts.dashboard')] class extends Component
     </div>
 
     <div class="mt-4">
-        {{ $categories->links() }}
+        {{ $this->categories->links() }}
+    </div>
+
+    <div>
+        @dump($selCategoryIds, $this->categories)
     </div>
 
     <!-- Modal -->
