@@ -63,10 +63,10 @@ new #[Layout('layouts.dashboard')] class extends Component {
     <div class="flex justify-between items-end text-gray-800 dark:text-gray-300 mb-4">
         <div class="flex flex-col gap-2">
             <h3 class="text-balance text-xl lg:text-2xl font-bold text-gray-950 dark:text-gray-100" aria-describedby="featureDescription">
-                Update Category
+                Edit {{ str($category->name)->words(4) }}
             </h3>
             <p id="featureDescription" class="text-pretty text-sm">
-                Fill up the form to update a category.
+                Fill up the form to edit the category.
             </p>
         </div>
     </div>
