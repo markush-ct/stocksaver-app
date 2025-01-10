@@ -26,7 +26,9 @@ new #[Layout('layouts.dashboard')] class extends Component
 
     public Category $selectedCategory;
 
-    public $selCategoryIds = [];
+    public $selectedCategories = [];
+
+    public $selectAll = false;
 
     public function boot()
     {
@@ -85,11 +87,12 @@ new #[Layout('layouts.dashboard')] class extends Component
         );
     }
 
-    public function bulkDelete()
+    public function deleteSelected()
     {
-        auth()->user()->categories()->whereIn('id', $this->selCategoryIds)->delete();
+        auth()->user()->categories()->whereIn('id', $this->selectedCategories)->delete();
 
-        $this->selCategoryIds = [];
+        $this->selectedCategories = [];
+        $this->selectAll = false;
 
         $this->dispatch(
             'notify',
@@ -99,12 +102,49 @@ new #[Layout('layouts.dashboard')] class extends Component
         );
     }
 
-    public function updatedPerPage($perPage)
+    public function updatedSelectAll(bool $value)
     {
-        $validPerPageValues = [10, 20, 30, 40, 50];
+        $idsOfCategories = $this->categories()->pluck('id')->toArray();
 
-        if (in_array($perPage, $validPerPageValues)) {
-            $this->perPage = $perPage;
+        if ($value) {
+            // get only the unselected items to be push to the deletion container
+            $unselectedCategories = array_diff($idsOfCategories, $this->selectedCategories);
+
+            // we keep pushing the id values to the deletion container
+            array_push($this->selectedCategories, ...$unselectedCategories);
+
+            $this->selectedCount = count($this->selectedCategories);
+        } else {
+            // unchecks all and retain the id values that is from the other page
+            $this->selectedCategories = array_diff($this->selectedCategories, $idsOfCategories);
+            // reset the select all
+            $this->selectAll = false;
+        }
+    }
+
+    public function updatedPage()
+    {
+        // checks if the current page selected all rows
+        $difference = array_diff($this->categories()->pluck('id')->toArray(), $this->selectedCategories);
+
+        // checks if there is no unselected items
+        if (count($difference) === 0) {
+            $this->selectAll = true;
+        } else {
+            $this->selectAll = false;
+        }
+    }
+
+    public function updatedPerPage()
+    {
+        // checks if the current page selected all rows
+        $difference = array_diff($this->categories()->pluck('id')->toArray(), $this->selectedCategories);
+
+        // checks if there is no unselected items
+        if (count($difference) === 0) {
+            $this->selectAll = true;
+        } else {
+            $this->selectAll = false;
         }
     }
 
@@ -171,12 +211,12 @@ new #[Layout('layouts.dashboard')] class extends Component
     <div class="mb-4 flex justify-between gap-2">
         <!-- bulk delete button -->
         <x-app.button
-            x-show="$wire.selCategoryIds.length > 0"
-            wire:click.prevent="bulkDelete"
+            x-show="$wire.selectedCategories.length > 0 || $wire.selectAll"
+            wire:click.prevent="deleteSelected"
             variant="danger"
-            x-bind:disabled="$wire.selCategoryIds.length < 1"
+            x-bind:disabled="$wire.selectedCategories.length < 1 || $wire.selectAll !== true ? false : true"
         >
-            Bulk Delete
+            Delete selected
         </x-app.button>
 
         <div class="relative flex w-full sm:max-w-xs flex-col gap-1 text-gray-800 dark:text-gray-300 ml-auto">
@@ -188,11 +228,11 @@ new #[Layout('layouts.dashboard')] class extends Component
     </div>
 
     <div
-        x-show="$wire.selCategoryIds.length > 0"
+        x-show="$wire.selectedCategories.length > 0 || $wire.selectAll"
         class="flex justify-between mb-4"
     >
         <p class="text-gray-800 dark:text-gray-300">
-            <span x-text="$wire.selCategoryIds.length"></span>
+            <span x-text="$wire.selectedCategories.length"></span>
             records selected
         </p>
         <button class="hover:underline text-red-500">
@@ -209,9 +249,11 @@ new #[Layout('layouts.dashboard')] class extends Component
                             <div class="relative flex items-center">
                                 <!-- selecting all table rows -->
                                 <input
+                                    wire:model="selectAll"
                                     type="checkbox"
                                     id="checkAll"
                                     class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
+                                    x-bind:checked="$wire.selectAll"
                                 />
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
@@ -232,13 +274,14 @@ new #[Layout('layouts.dashboard')] class extends Component
                                 <div class="relative flex items-center">
                                     <!-- selecting individual row -->
                                     <input
-                                        wire:model="selCategoryIds"
+                                        wire:model="selectedCategories"
                                         type="checkbox"
                                         name="selCategoryIds"
                                         id="{{ $category->id }}"
                                         value="{{ $category->id }}"
                                         class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
-                                        checked="{{ in_array($category->id, $selCategoryIds) }}"
+                                        checked="{{ in_array($category->id, $selectedCategories) }}"
+                                        x-bind:checked="$wire.selectAll"
                                     />
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
