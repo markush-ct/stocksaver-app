@@ -240,37 +240,38 @@ new #[Layout('layouts.dashboard')] class extends Component
         </button>
     </div>
 
+    <!-- categories table -->
     <div class="overflow-hidden w-full overflow-x-auto rounded-lg border border-gray-500 dark:border-gray-500">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-300">
-            <thead class="border-b border-gray-500 bg-gray-200 text-sm text-gray-950 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-100">
-                <tr>
-                    <th scope="col" class="p-4">
-                        <label for="checkAll" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
-                            <div class="relative flex items-center">
-                                <!-- selecting all table rows -->
-                                <input
-                                    wire:model="selectAll"
-                                    type="checkbox"
-                                    id="checkAll"
-                                    class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
-                                    x-bind:checked="$wire.selectAll"
-                                />
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                                </svg>
-                            </div>
-                        </label>
-                    </th>
-                    <th scope="col" class="p-4">Name</th>
-                    <th scope="col" class="p-4">Description</th>
-                    <th scope="col" class="p-4"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-500 dark:divide-gray-500">
+        <x-app.table>
+            <x-app.table.header>
+                <x-app.table.column>
+                    <label for="checkAll" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
+                        <div class="relative flex items-center">
+                            <!-- selecting all table rows -->
+                            <input
+                                wire:model="selectAll"
+                                type="checkbox"
+                                id="checkAll"
+                                class="before:content[''] peer relative size-4 cursor-pointer appearance-none overflow-hidden rounded border border-gray-500 bg-gray-50 before:absolute before:inset-0 checked:border-sky-900 checked:before:bg-sky-900 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-gray-900 checked:focus:outline-sky-900 active:outline-offset-0 dark:border-gray-500 dark:bg-gray-800 dark:checked:border-sky-400 dark:checked:before:bg-sky-400 dark:focus:outline-gray-300 dark:checked:focus:outline-sky-400"
+                                x-bind:checked="$wire.selectAll"
+                            />
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="4" class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-white peer-checked:visible dark:text-black">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                            </svg>
+                        </div>
+                    </label>
+                </x-app.table.column>
+                <x-app.table.column>Name</x-app.table.column>
+                <x-app.table.column>Description</x-app.table.column>
+                <!-- column for table actions -->
+                <x-app.table.column></x-app.table.column>
+            </x-app.table.header>
+
+            <x-app.table.body>
                 @forelse ($this->categories as $category)
-                    <tr wire:key="{{ $category->id }}" class='{{ $selectedRow === $category->id ? 'bg-sky-900/10 dark:bg-sky-400/10' : '' }}' wire:target="delete({{ $category->id }})">
-                        <td class="p-4">
-                            <label for="{{ $category->id }}" class="flex items-center cursor-pointer text-gray-800 dark:text-gray-300 ">
+                    <x-app.table.row>
+                        <x-app.table.cell>
+                            <label for="{{ $category->id }}" class="cursor-pointer text-gray-800 dark:text-gray-300 ">
                                 <div class="relative flex items-center">
                                     <!-- selecting individual row -->
                                     <input
@@ -288,43 +289,37 @@ new #[Layout('layouts.dashboard')] class extends Component
                                     </svg>
                                 </div>
                             </label>
-                        </td>
-                        <td class="p-4">
-                            <div class="max-w-[250px] truncate">
-                                {{ $category->name }}
+                        </x-app.table.cell>
+                        <x-app.table.cell>{{ $category->name }}</x-app.table.cell>
+                        <x-app.table.cell>{{ $category->description }}</x-app.table.cell>
+                        <x-app.table.cell>
+                            <div class="flex gap-1">
+                                <x-app.action-button wire:click="view({{ $category->id }})" wire:loading.attr="disabled" variant="inverse">
+                                    <x-app.icon-loader wire:target="view({{ $category->id }})" wire:loading.delay.default class="fill-black dark:fill-white" />
+                                    <i wire:target="view({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-eye text-base"></i>
+                                    View
+                                </x-app.action-button>
+                                <x-app.action-button variant="primary" x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')">
+                                    <i class="ph-fill ph-pencil-simple text-md"></i>
+                                    Edit
+                                </x-app.action-button>
+                                <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})">
+                                    <x-app.icon-loader wire:target="delete({{ $category->id }})" wire:loading.delay.default class="fill-red-500 dark:fill-red-500" />
+                                    <i wire:target="delete({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-trash-simple text-md"></i>
+                                    Delete
+                                </x-app.action-button>
                             </div>
-                        </td>
-                        <td class="p-4">
-                            <div class="max-w-[300px] truncate">
-                                {{ $category->description }}
-                            </div>
-                        </td>
-                        <td class="p-4 flex flex-row gap-1">
-                            <x-app.action-button wire:click="view({{ $category->id }})" wire:loading.attr="disabled" variant="inverse">
-                                <x-app.icon-loader wire:target="view({{ $category->id }})" wire:loading.delay.default class="fill-black dark:fill-white" />
-                                <i wire:target="view({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-eye text-base"></i>
-                                View
-                            </x-app.action-button>
-                            <x-app.action-button variant="primary" x-on:click="Livewire.navigate('{{ route('category.edit', $category->id) }}')">
-                                <i class="ph-fill ph-pencil-simple text-md"></i>
-                                Edit
-                            </x-app.action-button>
-                            <x-app.action-button variant="danger" wire:click="delete({{ $category->id }})">
-                                <x-app.icon-loader wire:target="delete({{ $category->id }})" wire:loading.delay.default class="fill-red-500 dark:fill-red-500" />
-                                <i wire:target="delete({{ $category->id }})" wire:loading.delay.default.remove class="ph-fill ph-trash-simple text-md"></i>
-                                Delete
-                            </x-app.action-button>
-                        </td>
-                    </tr>
+                        </x-app.table.cell>
+                    </x-app.table.row>
                 @empty
-                    <tr>
-                        <td colspan="4" class="text-center h-[100px]">
+                    <x-app.table.row>
+                        <x-app.table.cell colspan="4" class="text-center h-[100px]">
                             No categories found.
-                        </td>
-                    </tr>
+                        </x-app.table.cell>
+                    </x-app.table.row>
                 @endforelse
-            </tbody>
-        </table>
+            </x-app.table.body>
+        </x-app.table>
     </div>
 
     <!-- per page -->
